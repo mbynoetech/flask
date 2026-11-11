@@ -1,0 +1,261 @@
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<title>Daily Horoscope</title>
+
+<style>
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    font-family: Arial, sans-serif;
+    color: white;
+    background: linear-gradient(135deg, #160d35, #542c78);
+}
+
+.container {
+    width: 100%;
+    max-width: 550px;
+    padding: 35px;
+    text-align: center;
+    border-radius: 20px;
+    background: rgba(255,255,255,.10);
+    border: 1px solid rgba(255,255,255,.2);
+    box-shadow: 0 15px 45px #0005;
+}
+
+h1 {
+    color: #ffda8a;
+}
+
+.subtitle {
+    color: #e6d9f5;
+    line-height: 1.6;
+}
+
+select, button {
+    width: 100%;
+    padding: 15px;
+    margin-top: 15px;
+    border: 0;
+    border-radius: 10px;
+    font-size: 16px;
+}
+
+select {
+    background: white;
+    color: #24143f;
+    cursor: pointer;
+}
+
+button {
+    background: #ffcf70;
+    color: #24143f;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background .2s;
+}
+
+button:hover {
+    background: #ffe0a0;
+}
+
+button:disabled {
+    opacity: .6;
+    cursor: not-allowed;
+}
+
+#result {
+    margin-top: 25px;
+    text-align: left;
+    line-height: 1.8;
+    overflow-wrap: anywhere;
+}
+
+#result h2 {
+    color: #ffda8a;
+    text-align: center;
+    font-size: 23px;
+}
+
+.horoscope-card {
+    background: rgba(255,255,255,.10);
+    border: 1px solid rgba(255,255,255,.2);
+    border-radius: 14px;
+    padding: 22px;
+    margin-top: 15px;
+    line-height: 1.9;
+    font-size: 16px;
+}
+
+.prediction {
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+    margin: 0;
+}
+
+.loading {
+    color: #ffda8a;
+    text-align: center;
+}
+
+.error {
+    color: #ffaaaa;
+    background: rgba(255,0,0,.08);
+    padding: 15px;
+    border-radius: 10px;
+    text-align: center;
+}
+
+.footer {
+    margin-top: 25px;
+    color: #c9b8df;
+    font-size: 12px;
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <h1>✨ Daily Horoscope ✨</h1>
+
+    <p class="subtitle">
+        Discover what the stars have planned for you.
+    </p>
+
+    <select id="sign">
+
+        <option value="aries">♈ Aries</option>
+        <option value="taurus">♉ Taurus</option>
+        <option value="gemini">♊ Gemini</option>
+        <option value="cancer">♋ Cancer</option>
+        <option value="leo">♌ Leo</option>
+        <option value="virgo">♍ Virgo</option>
+        <option value="libra">♎ Libra</option>
+        <option value="scorpio">♏ Scorpio</option>
+        <option value="sagittarius">♐ Sagittarius</option>
+        <option value="capricorn">♑ Capricorn</option>
+        <option value="aquarius">♒ Aquarius</option>
+        <option value="pisces">♓ Pisces</option>
+
+    </select>
+
+    <button id="getButton" onclick="getHoroscope()">
+        Get My Horoscope
+    </button>
+
+    <div id="result"></div>
+
+    <div class="footer">
+        ✨ Your daily cosmic guidance ✨
+    </div>
+
+</div>
+
+<script>
+
+async function getHoroscope() {
+
+    const sign = document.getElementById("sign").value;
+    const result = document.getElementById("result");
+    const button = document.getElementById("getButton");
+
+    button.disabled = true;
+
+    result.innerHTML = `
+        <div class="loading">
+            <h3>✨ Reading the stars...</h3>
+            <p>Please wait.</p>
+        </div>
+    `;
+
+    try {
+
+        const response = await fetch(
+            "/horoscope?sign=" + encodeURIComponent(sign)
+        );
+
+        const data = await response.json();
+
+        if (!response.ok) {
+
+            console.error("Horoscope API error:", data);
+
+            throw new Error(
+                data.error || "Unable to load horoscope."
+            );
+        }
+
+        if (!data.success || !data.prediction) {
+
+            throw new Error(
+                "The server did not return a horoscope prediction."
+            );
+        }
+
+        // Display only the prediction returned by Flask.
+        result.innerHTML = `
+            <h2>✨ ${escapeHTML(sign.toUpperCase())} Horoscope ✨</h2>
+
+            <div class="horoscope-card">
+                <p class="prediction">
+                    ${escapeHTML(data.prediction)}
+                </p>
+            </div>
+        `;
+
+    } catch (error) {
+
+        result.innerHTML = `
+            <div class="error">
+                <strong>Unable to load horoscope</strong>
+                <p>${escapeHTML(error.message)}</p>
+            </div>
+        `;
+
+    } finally {
+
+        button.disabled = false;
+
+    }
+
+}
+
+
+// Protect the page from HTML injection.
+function escapeHTML(value) {
+
+    return String(value).replace(/[&<>"']/g, function(char) {
+
+        return {
+            "&": "&amp;",
+            "<": "&lt;",
+            ">": "&gt;",
+            '"': "&quot;",
+            "'": "&#39;"
+        }[char];
+
+    });
+
+}
+
+</script>
+
+</body>
+</html>
