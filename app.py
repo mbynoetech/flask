@@ -14,7 +14,7 @@ app = Flask(__name__)
 # RAPIDAPI CONFIGURATION
 # -----------------------------
 
-RAPIDAPI_KEY = os.getenv("RAPIDAPI_KEY", "fa1c43979dmsh0f4c5307cba620cp13b9a0jsn291d9a9db6dc").strip()
+RAPIDAPI_KEY = os.getenv("RAPIDAPI_KEY", "xxxx").strip()
 RAPIDAPI_HOST = os.getenv("RAPIDAPI_HOST", "multilingual-ai-zodiac-customized-horoscopes-for-all-signs.p.rapidapi.com").strip()
 
 API_URL = f"https://{RAPIDAPI_HOST}/horoscope-all.php"
